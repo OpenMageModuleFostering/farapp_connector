@@ -9,7 +9,7 @@
 <config>
     <modules>
         <FarApp_Connector>
-            <version>1.5.8</version>
+            <version>1.5.9</version>
         </FarApp_Connector>
     </modules>
     <global>
@@ -28,6 +28,11 @@
                     <product_api>FarApp_Connector_Model_Product_Api</product_api>
                 </rewrite>
             </catalog>
+            <core>
+                <rewrite>
+                    <store_api>FarApp_Connector_Model_Store_Api</store_api>
+                </rewrite>
+            </core>
             <importexport>
                 <rewrite>
                     <import_entity_product>FarApp_Connector_Model_Import_Entity_Product</import_entity_product>

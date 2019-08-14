@@ -21,6 +21,13 @@
         <part name="identifierType" type="xsd:string"/>
         <part name="detailed" type="xsd:boolean"/>
     </message>
+    <message name="storeListRequest">
+        <part name="sessionId" type="xsd:string" />
+    </message>
+    <message name="storeInfoRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="storeId" type="xsd:string" />
+    </message>
 
     <service name="{{var wsdl.name}}Service">
         <port name="{{var wsdl.handler}}Port" binding="typens:{{var wsdl.handler}}Binding">

@@ -24,6 +24,19 @@
                     </info>
                 </methods>
             </farapp_connector_product>
+            <farapp_connector_store translate="title" module="farapp_connector">
+                <title>FarApp Connector Store API</title>
+                <model>farapp_connector/store_api</model>
+                <methods>
+                    <list translate="title" module="farapp_connector">
+                        <title>Adds website code to store list</title>
+                        <method>items</method>
+                    </list>
+                    <info translate="title" module="farapp_connector">
+                        <title>Adds website code to store info</title>
+                    </info>
+                </methods>
+            </farapp_connector_store>
         </resources>
     </api>
 </config>
