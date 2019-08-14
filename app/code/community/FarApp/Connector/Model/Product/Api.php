@@ -2,11 +2,12 @@
 
 class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
 {
-    public function items($filters = null, $store = null, $detailed = false)
+    public function items($filters = null, $store = null, $detailed = false, $start = null, $limit = null)
     {
         $collection = Mage::getModel('catalog/product')->getCollection()
             ->addStoreFilter($this->_getStoreId($store))
-            ->addAttributeToSelect('name');
+            ->addAttributeToSelect('name')
+            ->setOrder('updated_at', 'asc');
 
         /** @var $apiHelper Mage_Api_Helper_Data */
         $apiHelper = Mage::helper('api');
@@ -22,7 +23,20 @@ class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
             $this->_fault('filters_invalid', $e->getMessage());
         }
         $result = array();
+        $productIdx = 0;
         foreach ($collection as $product) {
+            if (!is_null($start)) {
+                if ($productIdx < $start) {
+                    ++$productIdx;
+                    continue;
+                }
+            }
+            if (!is_null($limit)) {
+                if (count($result) == $limit) {
+                    break;
+                }
+            }
+            ++$productIdx;
             if (!$detailed) {
                 $result[] = array(
                     'product_id' => $product->getId(),
@@ -35,7 +49,7 @@ class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
                 );
             }
             else {
-                Mage::log('HI1 '.$product->getId());
+                //Mage::log('HI1 '.$product->getId());
                 $productDetails = $this->info($product->getId(), null, null, null, true);
                 $mediaApi = new Mage_Catalog_Model_Product_Attribute_Media_Api();
                 $mediaList = $mediaApi->items($product->getId());
