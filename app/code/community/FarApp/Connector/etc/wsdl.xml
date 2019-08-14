@@ -8,6 +8,20 @@
         <part name="invoiceIncrementId" type="xsd:string" />
         <part name="offline" type="xsd:boolean" />
     </message>
+    <message name="catalogProductListRequest">
+        <part name="sessionId" type="xsd:string"/>
+        <part name="filters" type="typens:filters"/>
+        <part name="storeView" type="xsd:string"/>
+        <part name="detailed" type="xsd:boolean"/>
+    </message>
+    <message name="catalogProductInfoRequest">
+        <part name="sessionId" type="xsd:string"/>
+        <part name="productId" type="xsd:string"/>
+        <part name="storeView" type="xsd:string"/>
+        <part name="attributes" type="typens:catalogProductRequestAttributes"/>
+        <part name="identifierType" type="xsd:string"/>
+        <part name="detailed" type="xsd:boolean"/>
+    </message>
 
     <service name="{{var wsdl.name}}Service">
         <port name="{{var wsdl.handler}}Port" binding="typens:{{var wsdl.handler}}Binding">

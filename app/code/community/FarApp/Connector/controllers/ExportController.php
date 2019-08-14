@@ -172,6 +172,7 @@ class FarApp_Connector_ExportController extends Mage_Core_Controller_Front_Actio
         }
 
         try {
+            Mage::app()->setCurrentStore('admin');
             /** @var $model Mage_ImportExport_Model_Export */
             $model = Mage::getModel('importexport/export');
             $model->setData($this->getRequest()->getParams());
@@ -183,11 +184,11 @@ class FarApp_Connector_ExportController extends Mage_Core_Controller_Front_Actio
             );
         } catch (Mage_Core_Exception $e) {
             echo $e->getMessage();
-            $this->_getSession()->addError($e->getMessage());
+            Mage::getSingleton('admin/session')->addError($e->getMessage());
         } catch (Exception $e) {
             echo $this->__('No valid data sent');
             Mage::logException($e);
-            $this->_getSession()->addError($this->__('No valid data sent'));
+            Mage::getSingleton('admin/session')->addError($this->__('No valid data sent'));
         }
         return;
 

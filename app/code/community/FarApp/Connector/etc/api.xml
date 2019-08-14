@@ -11,6 +11,19 @@
                     </capture>
                 </methods>
             </farapp_connector_order_invoice>
+            <farapp_connector_product translate="title" module="farapp_connector">
+                <title>FarApp Connector Product API</title>
+                <model>farapp_connector/product_api</model>
+                <methods>
+                    <list translate="title" module="farapp_connector">
+                        <title>Adds detailed parameter to products list</title>
+                        <method>items</method>
+                    </list>
+                    <info translate="title" module="farapp_connector">
+                        <title>Adds detailed parameter to product info</title>
+                    </info>
+                </methods>
+            </farapp_connector_product>
         </resources>
     </api>
 </config>
