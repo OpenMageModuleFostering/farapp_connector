@@ -9,7 +9,7 @@
 <config>
     <modules>
         <FarApp_Connector>
-            <version>1.5.6</version>
+            <version>1.5.7</version>
         </FarApp_Connector>
     </modules>
     <global>
@@ -134,4 +134,25 @@
             </resources>
         </acl>
     </adminhtml>
+    <default>
+        <connector>
+            <general>
+                <import_behavior>replace</import_behavior>
+                <partial_indexing>0</partial_indexing>
+                <continue_after_errors>0</continue_after_errors>
+                <error_limit>100</error_limit>
+                <support_nested_arrays>0</support_nested_arrays>
+                <ignore_duplicates>0</ignore_duplicates>
+                <clear_field_on_empty_string>0</clear_field_on_empty_string>
+                <symbol_for_clear_field>FARAPPOMIT</symbol_for_clear_field>
+                <symbol_for_ignore_field>FARAPPIGNORE</symbol_for_ignore_field>
+            </general>
+            <product>
+                <allow_rename_files>1</allow_rename_files>
+                <status>1</status>
+                <visibility>4</visibility>
+                <weight>0</weight>
+            </product>
+        </connector>
+    </default>
 </config>

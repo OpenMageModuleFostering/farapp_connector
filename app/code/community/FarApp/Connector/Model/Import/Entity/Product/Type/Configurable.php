@@ -39,7 +39,7 @@ class FarApp_Connector_Model_Import_Entity_Product_Type_Configurable
                 if (isset($rowData[$attrCode]) && strlen($rowData[$attrCode])) {
                     $resultAttrs[$attrCode] =
                         ('select' == $attrParams['type'] || 'multiselect' == $attrParams['type'])
-                            ? $attrParams['options'][Mage::helper('fastsimpleimport')->strtolower($rowData[$attrCode])]
+                            ? $attrParams['options'][Mage::helper('connector')->strtolower($rowData[$attrCode])]
                             : $rowData[$attrCode];
                 } elseif (array_key_exists($attrCode, $rowData)) {
                     $resultAttrs[$attrCode] = $rowData[$attrCode];
@@ -105,7 +105,7 @@ class FarApp_Connector_Model_Import_Entity_Product_Type_Configurable
             case 'status':
             case 'visibility':
             case 'weight':
-                $defaultValue = Mage::getStoreConfig('fastsimpleimport/product/' . $attrParams['code']);
+                $defaultValue = Mage::getStoreConfig('connector/product/' . $attrParams['code']);
                 if (strlen($defaultValue)) {
                     return $defaultValue;
                 }
@@ -234,7 +234,7 @@ class FarApp_Connector_Model_Import_Entity_Product_Type_Configurable
                     );
                 }
                 if (isset($rowData['_super_attribute_option']) && strlen($rowData['_super_attribute_option'])) {
-                    $optionId = $attrParams['options'][Mage::helper('fastsimpleimport')->strtolower($rowData['_super_attribute_option'])];
+                    $optionId = $attrParams['options'][Mage::helper('connector')->strtolower($rowData['_super_attribute_option'])];
 
                     if (!isset($productSuperData['used_attributes'][$attrParams['id']][$optionId])) {
                         $productSuperData['used_attributes'][$attrParams['id']][$optionId] = false;
