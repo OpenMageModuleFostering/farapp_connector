@@ -268,6 +268,125 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         return $this;
     }
 
+    /**
+     * Prepare attributes data
+     *
+     * @param array       $rowData    Row data
+     * @param int         $rowScope   Row scope
+     * @param array       $attributes Attributes
+     * @param string|null $rowSku     Row sku
+     * @param int         $rowStore   Row store
+     * @return array
+     */
+    protected function _prepareAttributes($rowData, $rowScope, $attributes, $rowSku, $rowStore)
+    {
+        if (method_exists($this, '_prepareUrlKey')) {
+            $rowData = $this->_prepareUrlKey($rowData, $rowScope, $rowSku);
+        }
+        $product = Mage::getModel('importexport/import_proxy_product', $rowData);
+        foreach ($rowData as $attrCode => $attrValue) {
+            $attribute = $this->_getAttribute($attrCode);
+            if ('multiselect' != $attribute->getFrontendInput()
+                && self::SCOPE_NULL == $rowScope
+            ) {
+                continue; // skip attribute processing for SCOPE_NULL rows
+            }
+            $attrId = $attribute->getId();
+            $backModel = $attribute->getBackendModel();
+            $attrTable = $attribute->getBackend()->getTable();
+            $storeIds = array($rowStore);
+            if (!is_null($attrValue)) {
+                if ('datetime' == $attribute->getBackendType() && strtotime($attrValue)) {
+                    $attrValue = gmstrftime($this->_getStrftimeFormat(), strtotime($attrValue));
+                } elseif ($backModel) {
+                    $attribute->getBackend()->beforeSave($product);
+                    $attrValue = $product->getData($attribute->getAttributeCode());
+                }
+            }
+            if (self::SCOPE_STORE == $rowScope) {
+                if (self::SCOPE_WEBSITE == $attribute->getIsGlobal()) {
+                    // check website defaults already set
+                    if (!isset($attributes[$attrTable][$rowSku][$attrId][$rowStore])) {
+                        $storeIds = $this->_storeIdToWebsiteStoreIds[$rowStore];
+                    }
+                } elseif (self::SCOPE_STORE == $attribute->getIsGlobal()) {
+                    $storeIds = array($rowStore);
+                }
+            }
+            foreach ($storeIds as $storeId) {
+                if ('multiselect' == $attribute->getFrontendInput()) {
+                    if (!isset($attributes[$attrTable][$rowSku][$attrId][$storeId])) {
+                        $attributes[$attrTable][$rowSku][$attrId][$storeId] = '';
+                    } else {
+                        $attributes[$attrTable][$rowSku][$attrId][$storeId] .= ',';
+                    }
+                    $attributes[$attrTable][$rowSku][$attrId][$storeId] .= $attrValue;
+                } else {
+                    $attributes[$attrTable][$rowSku][$attrId][$storeId] = $attrValue;
+                }
+            }
+            $attribute->setBackendModel($backModel); // restore 'backend_model' to avoid 'default' setting
+        }
+        return $attributes;
+    }
+
+    /**
+     * Save product attributes.
+     *
+     * @param array $attributesData Attribute data
+     * @return Mage_ImportExport_Model_Import_Entity_Product
+     */
+    protected function _saveProductAttributes(array $attributesData)
+    {
+        foreach ($attributesData as $tableName => $skuData) {
+            $tableData = array();
+            foreach ($skuData as $sku => $attributes) {
+                $productId = $this->_newSku[$sku]['entity_id'];
+                foreach ($attributes as $attributeId => $storeValues) {
+                    foreach ($storeValues as $storeId => $storeValue) {
+                        // For storeId 0 we *must* save the NULL value into DB otherwise product collections can not load the store specific values
+                        if ($storeId == 0 || ! is_null($storeValue)) {
+                            $tableData[] = array(
+                                'entity_id'      => $productId,
+                                'entity_type_id' => $this->_entityTypeId,
+                                'attribute_id'   => $attributeId,
+                                'store_id'       => $storeId,
+                                'value'          => $storeValue
+                            );
+                        } else {
+                            /** @var Magento_Db_Adapter_Pdo_Mysql $connection */
+                            $connection = $this->_connection;
+                            $connection->delete($tableName, array(
+                                'entity_id=?'      => (int) $productId,
+                                'entity_type_id=?' => (int) $this->_entityTypeId,
+                                'attribute_id=?'   => (int) $attributeId,
+                                'store_id=?'       => (int) $storeId,
+                            ));
+                        }
+                    }
+                    if (Mage_ImportExport_Model_Import::BEHAVIOR_APPEND != $this->getBehavior()) {
+                        /**
+                         * If the store based values are not provided for a particular store,
+                         * we default to the default scope values.
+                         * In this case, remove all the existing store based values stored in the table.
+                         **/
+                        $where = $this->_connection->quoteInto('store_id NOT IN (?)', array_keys($storeValues)) .
+                            $this->_connection->quoteInto(' AND attribute_id = ?', $attributeId) .
+                            $this->_connection->quoteInto(' AND entity_id = ?', $productId) .
+                            $this->_connection->quoteInto(' AND entity_type_id = ?', $this->_entityTypeId);
+                        $this->_connection->delete(
+                            $tableName, $where
+                        );
+                    }
+                }
+            }
+            if (count($tableData)) {
+                $this->_connection->insertOnDuplicate($tableName, $tableData, array('value'));
+            }
+        }
+        return $this;
+    }
+
     protected function _saveStockItem()
     {
         $defaultStockData = array(
@@ -352,9 +471,22 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         return $this;
     }
 
+    public function filterRowData(&$rowData) {
+        $this->_filterRowData($rowData);
+    }
+
     protected function _filterRowData(&$rowData)
     {
         $rowData = array_filter($rowData, 'strlen');
+
+        foreach($rowData as $key => $fieldValue) {
+            if (trim($fieldValue) == 'FARAPPOMIT') {
+                $rowData[$key] = NULL;
+            } else if (trim($fieldValue) == 'FARAPPIGNORE') {
+                unset($rowData[$key]);
+            }
+        }
+
         // Exceptions - for sku - put them back in
         if (!isset($rowData[self::COL_SKU])) {
             $rowData[self::COL_SKU] = null;

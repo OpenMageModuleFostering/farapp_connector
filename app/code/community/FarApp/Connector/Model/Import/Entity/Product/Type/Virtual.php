@@ -1,0 +1,5 @@
+<?php
+
+class FarApp_Connector_Model_Import_Entity_Product_Type_Virtual extends FarApp_Connector_Model_Import_Entity_Product_Type_Simple {
+
+}

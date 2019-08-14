@@ -9,7 +9,7 @@
 <config>
     <modules>
         <FarApp_Connector>
-            <version>1.5.5</version>
+            <version>1.5.6</version>
         </FarApp_Connector>
     </modules>
     <global>
@@ -28,6 +28,11 @@
                     <product_api>FarApp_Connector_Model_Product_Api</product_api>
                 </rewrite>
             </catalog>
+            <importexport>
+                <rewrite>
+                    <import_entity_product>FarApp_Connector_Model_Import_Entity_Product</import_entity_product>
+                </rewrite>
+            </importexport>
         </models>
         <events>
             <sales_order_save_after>
@@ -59,6 +64,13 @@
                     <label>Orders</label>
                 </order>
             </import_entities>
+            <import_product_types>
+                <simple>farapp_connector/import_entity_product_type_simple</simple>
+                <configurable>farapp_connector/import_entity_product_type_configurable</configurable>
+                <virtual>farapp_connector/import_entity_product_type_virtual</virtual>
+                <grouped>farapp_connector/import_entity_product_type_grouped</grouped>
+                <bundle>farapp_connector/import_entity_product_type_bundle</bundle>
+            </import_product_types>
             <export_entities>
                 <order translate="label">
                     <model_token>farapp_connector/export_entity_order</model_token>
@@ -81,6 +93,13 @@
                     <label>Orders</label>
                 </order>
             </import_entities>
+            <import_product_types>
+                <simple>farapp_connector/import_entity_product_type_simple</simple>
+                <configurable>farapp_connector/import_entity_product_type_configurable</configurable>
+                <virtual>farapp_connector/import_entity_product_type_virtual</virtual>
+                <grouped>farapp_connector/import_entity_product_type_grouped</grouped>
+                <bundle>farapp_connector/import_entity_product_type_bundle</bundle>
+            </import_product_types>
         </importexport>
     </global>
     <frontend>
