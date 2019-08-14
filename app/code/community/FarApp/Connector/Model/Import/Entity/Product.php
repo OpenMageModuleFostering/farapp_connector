@@ -9,6 +9,70 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         $this->_errorsLimit = 1000000000;
     }
 
+    protected function _saveValidatedBunches()
+    {
+        $source          = $this->_getSource();
+        $productDataSize = 0;
+        $bunchRows       = array();
+        $startNewBunch   = false;
+        $nextRowBackup   = array();
+        $maxDataSize = Mage::getResourceHelper('importexport')->getMaxDataSize();
+        $bunchSize = Mage::helper('importexport')->getBunchSize();
+
+        $source->rewind();
+        $this->_dataSourceModel->cleanBunches();
+
+        while ($source->valid() || $bunchRows) {
+            if ($startNewBunch || !$source->valid()) {
+                if ($startNewBunch && !array_values($nextRowBackup)[0]['sku']) {
+                    $arrKeys = array_keys($bunchRows);
+                    $arrNew  = array();
+                    while(($tRow = array_pop($bunchRows))) {
+                        $tKey = array_pop($arrKeys);
+                        $arrNew[$tKey] = $tRow;
+                        if ($tRow['sku']) {
+                            break;
+                        }
+                    }
+                    $nextRowBackup = array_reverse($arrNew, TRUE) + $nextRowBackup;
+                }
+                if ($bunchRows) {
+                    $this->_dataSourceModel->saveBunch($this->getEntityTypeCode(), $this->getBehavior(), $bunchRows);
+                }
+
+                $bunchRows       = $nextRowBackup;
+                $productDataSize = strlen(serialize($bunchRows));
+                $startNewBunch   = false;
+                $nextRowBackup   = array();
+            }
+            if ($source->valid()) {
+                if ($this->_errorsCount >= $this->_errorsLimit) { // errors limit check
+                    return;
+                }
+                $rowData = $source->current();
+
+                $this->_processedRowsCount++;
+
+                if ($this->validateRow($rowData, $source->key())) { // add row to bunch for save
+                    $rowData = $this->_prepareRowForDb($rowData);
+                    $rowSize = strlen(Mage::helper('core')->jsonEncode($rowData));
+
+                    $isBunchSizeExceeded = ($bunchSize > 0 && count($bunchRows) >= $bunchSize);
+
+                    if (($productDataSize + $rowSize) >= $maxDataSize || $isBunchSizeExceeded) {
+                        $startNewBunch = true;
+                        $nextRowBackup = array($source->key() => $rowData);
+                    } else {
+                        $bunchRows[$source->key()] = $rowData;
+                        $productDataSize += $rowSize;
+                    }
+                }
+                $source->next();
+            }
+        }
+        return $this;
+    }
+
     protected function _createAttributeOption($attrType, $attrCode, array $rowData, $rowNum)
     {
         /** @var $attribute Mage_Eav_Model_Entity_Attribute */
@@ -95,7 +159,12 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
                     return '';
                 }
             }
-            return parent::_uploadMediaFiles($correctedBaseName);
+            if (is_file($fullTempPath)) {
+                return parent::_uploadMediaFiles($correctedBaseName);
+            }
+            else {
+                return '';
+            }
         }
         else {
             return $destPath;
