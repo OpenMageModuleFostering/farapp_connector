@@ -123,6 +123,7 @@ class FarApp_Connector_Model_Observer {
 
         /** @var $shipping_address Mage_Sales_Model_Order_Payment*/
         $payment = $orderIn->getPayment()->getData();
+        $orderOut['payment'] = $payment;
 
         // remove cc fields
         //foreach ($payment as $key => $value) {
