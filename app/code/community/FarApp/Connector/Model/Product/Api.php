@@ -11,11 +11,11 @@ class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
         /** @var $apiHelper Mage_Api_Helper_Data */
         $apiHelper = Mage::helper('api');
         $filters = $apiHelper->parseFilters($filters, $this->_filtersMap);
-        Mage::log('HI0.6');
+        //Mage::log('HI0.6');
         try {
-            Mage::log('HI0.61');
+            //Mage::log('HI0.61');
             foreach ($filters as $field => $value) {
-                Mage::log('HI0.62 '.$field.' '.$value);
+                //Mage::log('HI0.62 '.$field.' '.$value);
                 $collection->addFieldToFilter($field, $value);
             }
         } catch (Mage_Core_Exception $e) {
@@ -76,6 +76,16 @@ class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
             }
         }
 
+        if ($result['type'] == 'configurable') {
+            $result['configurable_child_ids'] = Mage::getModel('catalog/product_type_configurable')->getChildrenIds($productId);
+            $result['configurable_options'] = $product->getTypeInstance(true)->getConfigurableOptions($product);
+        }
+        else {
+            $configurableParentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($productId);
+            if ($configurableParentIds) {
+                $result['configurable_parent_ids'] = $configurableParentIds;
+            }
+        }
         return $result;
     }
 }
