@@ -29,7 +29,8 @@ class FarApp_Connector_Model_Observer {
             /** @var $order Mage_Sales_Model_Order */
             $order = $observer->getEvent()->getOrder();
             $orderStatus = $order->getStatus();
-            $url = Mage::getStoreConfig('connector/order/url', $order['store_id']);
+            //$url = Mage::getStoreConfig('connector/order/url', $order['store_id']);
+            $url = Mage::getStoreConfig('connector/order/url');
             if (!is_null($orderStatus) && $url) {
                 $data = $this->transformOrder($order);
                 $response = $this->proxy($data, $url);
