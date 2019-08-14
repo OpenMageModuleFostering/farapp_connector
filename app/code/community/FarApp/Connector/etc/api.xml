@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config>
+    <api>
+        <resources>
+            <farapp_connector_order_invoice translate="title" module="farapp_connector">
+                <title>FarApp Connector Order Invoice API</title>
+                <model>farapp_connector/order_invoice_api</model>
+                <methods>
+                    <capture translate="title" module="farapp_connector">
+                        <title>Adds offline parameter to invoice capture</title>
+                    </capture>
+                </methods>
+            </farapp_connector_order_invoice>
+        </resources>
+    </api>
+</config>

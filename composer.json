@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/FarApp_Connector",
+    "type": "magento-module",
+    "license": "Commercial",
+    "homepage": "",
+    "description": "Connector to sync product data from FarApp to Magento. FarApp currently supports NetSuite and other backends.",
+    "authors": [
+    {
+        "name": "FarApp",
+        "email": "support@farapp.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

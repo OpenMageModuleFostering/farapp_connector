@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+/**
+* Module configuration
+*
+* @author Eyal Amir
+*/
+-->
+<config>
+    <modules>
+        <FarApp_Connector>
+            <version>1.1.6</version>
+        </FarApp_Connector>
+    </modules>
+    <global>
+        <models>
+            <farapp_connector>
+                <class>FarApp_Connector_Model</class>
+            </farapp_connector>
+            <sales>
+                <rewrite>
+                    <order_invoice_api>FarApp_Connector_Model_Order_Invoice_Api</order_invoice_api>
+                </rewrite>
+            </sales>
+        </models>
+        <farapp_connector module="farapp_connector">
+            <import_entities>
+                <catalog_product translate="label">
+                    <model_token>farapp_connector/import_entity_product</model_token>
+                    <label>Products</label>
+                </catalog_product>
+                <customer translate="label">
+                    <model_token>farapp_connector/import_entity_customer</model_token>
+                    <label>Customers</label>
+                </customer>
+                <order translate="label">
+                    <model_token>farapp_connector/import_entity_order</model_token>
+                    <label>Orders</label>
+                </order>
+            </import_entities>
+            <export_entities>
+                <order translate="label">
+                    <model_token>farapp_connector/export_entity_order</model_token>
+                    <label>Orders</label>
+                </order>
+            </export_entities>
+        </farapp_connector>
+        <importexport module="importexport">
+            <import_entities>
+                <catalog_product translate="label">
+                    <model_token>farapp_connector/import_entity_product</model_token>
+                    <label>Products</label>
+                </catalog_product>
+                <customer translate="label">
+                    <model_token>farapp_connector/import_entity_customer</model_token>
+                    <label>Customers</label>
+                </customer>
+                <order translate="label">
+                    <model_token>farapp_connector/import_entity_order</model_token>
+                    <label>Orders</label>
+                </order>
+            </import_entities>
+        </importexport>
+    </global>
+    <frontend>
+        <routers>
+            <connector>
+                <use>standard</use>
+                <args>
+                    <module>FarApp_Connector</module>
+                    <frontName>farapp_connector</frontName>
+                </args>
+            </connector>
+        </routers>
+    </frontend>
+</config>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+    <name>FarApp_Connector</name>
+    <version>1.1.6</version>
+    <stability>stable</stability>
+    <license uri="http://www.farapp.com/p/farapp-subscription-form">Commercial</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Connector to sync product data from FarApp to Magento. FarApp currently supports NetSuite and other backends.</summary>
+    <description>FarApp is a cloud-based solution for posting product data to storefronts, retrieving orders from storefront and posting fulfillments to storefronts. We support various backends including NetSuite, X-Cart, 3D-Cart, and more. This connector allows full product data posting to Magento from FarApp. It has the the extra benefits of allowing FarApp to dynamically push new product data, automatically creating new attribute options and importing external images (features not provided by Magento).</description>
+    <notes>Small fix to make invoice capture offline paramater optional</notes>
+    <authors><author><name>FarApp</name><user>FarApp</user><email>support@farapp.com</email></author></authors>
+    <date>2014-11-19</date>
+    <time>16:13:01</time>
+    <contents><target name="magecommunity"><dir name="FarApp"><dir name="Connector"><dir name="Model"><dir name="Export"><dir name="Adapter"><file name="Abstract.php" hash="765dc8fbab996f17b9f049cc8aa906a0"/><file name="Array.php" hash="6ca62c702dcb9512ec429563ac1ce1a2"/></dir><dir name="Entity"><file name="Order.php" hash="14a2f735cf8fc5e8f2bcd6682a1e56b1"/></dir></dir><file name="Export.php" hash="01643ef101731c6d98bbc523642f95a0"/><dir name="Import"><dir name="Entity"><file name="Customer.php" hash="376978f635c73605d428037cca8cf594"/><file name="Order.php" hash="38579396825a1bd3ad59de84278085f6"/><file name="Product.php" hash="e2e8d4ba1c5551b9863ee964d8461470"/><file name="minVersion2.php" hash="8df670fd68516ba1629304ae8ab6c812"/></dir></dir><file name="Import.php" hash="5f226d5505bf8e258a4e61f43b09b25a"/><dir name="Order"><dir name="Invoice"><file name="Api.php" hash="f133255dae51ab9c44c71ca9cc702d0a"/></dir></dir></dir><dir name="controllers"><file name="ExportController.php" hash="c994585c4535fc8b402160960092be95"/><file name="ImportController.php" hash="ec66abaf46073b9491889a199d665992"/><file name="IndexController.php" hash="93918848d3ce7f6ad05688f89a730e75"/></dir><dir name="etc"><file name="api.xml" hash="25b50336e5bfbd139eeb81bbf321dd78"/><file name="config.xml" hash="2b0b93dc306a0d14083791738d2d8353"/><file name="wsdl.xml" hash="831bf87f9939132a9d9be6327d1b6a8e"/></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="FarApp_Connector.xml" hash="ff3fe315c70239229cb5ff3a49d40967"/></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.0.0</min><max>5.6.0</max></php><package><name>Mage_Core_Modules</name><channel>community</channel><min>1.6.0.0</min><max>1.9.0.1</max></package></required></dependencies>
+</package>
