@@ -115,11 +115,15 @@ class FarApp_Connector_Model_Observer {
 
         /** @var $shipping_address Mage_Sales_Model_Order_Address*/
         $shipping_address = $orderIn->getShippingAddress();
-        $orderOut['shipping_address'] = $shipping_address->getData();
+        if ($shipping_address) {
+            $orderOut['shipping_address'] = $shipping_address->getData();
+        }
 
         /** @var $shipping_address Mage_Sales_Model_Order_Address*/
         $billing_address = $orderIn->getBillingAddress();
-        $orderOut['billing_address'] = $billing_address->getData();
+        if ($billing_address) {
+            $orderOut['billing_address'] = $billing_address->getData();
+        }
 
         /** @var $shipping_address Mage_Sales_Model_Order_Payment*/
         $payment = $orderIn->getPayment()->getData();
