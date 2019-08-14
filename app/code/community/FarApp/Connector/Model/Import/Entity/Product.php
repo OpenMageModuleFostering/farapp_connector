@@ -71,16 +71,18 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
 
     protected function _uploadMediaFiles($fileName)
     {
-        $fullTempPath = $this->_getUploader()->getTmpDir() . DS . basename($fileName);
-        $fullDestPath = $this->_getUploader()->correctFileNameCase(Mage_Core_Model_File_Uploader::getDispretionPath(basename($fileName)) . DS . basename($fileName));
-        if (!is_file($fullTempPath) && !is_file($fullDestPath)) {
-            if (strpos($fileName, 'http') === 0 && strpos($fileName, '://') !== false) {
+        $correctedBaseName = Mage_Core_Model_File_Uploader::getCorrectFileName(basename($fileName));
+        $fullTempPath = $this->_getUploader()->getTmpDir() . DS . $correctedBaseName;
+        $destPath = $this->_getUploader()->correctFileNameCase(Mage_Core_Model_File_Uploader::getDispretionPath(basename($fileName)) . DS . $correctedBaseName);
+        $fullDestPath = $this->_getUploader()->getDestDir() . DS . $destPath;
+        if (!is_file($fullDestPath)) {
+            if (!is_file($fullTempPath) && strpos($fileName, 'http') === 0 && strpos($fileName, '://') !== false) {
                 try {
                     $dir = $this->_getUploader()->getTmpDir();
                     if (!is_dir($dir)) {
                         mkdir($dir);
                     }
-                    $fileHandle = fopen($dir . DS . basename($fileName), 'w+');
+                    $fileHandle = fopen($fullTempPath, 'w+');
                     $ch = curl_init($fileName);
                     curl_setopt($ch, CURLOPT_TIMEOUT, 50);
                     curl_setopt($ch, CURLOPT_FILE, $fileHandle);
@@ -92,10 +94,10 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
                     return '';
                 }
             }
-            return parent::_uploadMediaFiles(basename($fileName));
+            return parent::_uploadMediaFiles($correctedBaseName);
         }
         else {
-            return $fullDestPath;
+            return $destPath;
         }
     }
 
