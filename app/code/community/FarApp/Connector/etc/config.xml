@@ -9,7 +9,7 @@
 <config>
     <modules>
         <FarApp_Connector>
-            <version>1.2.3</version>
+            <version>1.2.4</version>
         </FarApp_Connector>
     </modules>
     <global>
@@ -20,6 +20,7 @@
             <sales>
                 <rewrite>
                     <order_invoice_api>FarApp_Connector_Model_Order_Invoice_Api</order_invoice_api>
+                    <order_creditmemo_api>FarApp_Connector_Model_Order_Creditmemo_Api</order_creditmemo_api>
                 </rewrite>
             </sales>
         </models>
