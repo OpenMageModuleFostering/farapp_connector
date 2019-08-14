@@ -125,11 +125,11 @@ class FarApp_Connector_Model_Observer {
         $payment = $orderIn->getPayment()->getData();
 
         // remove cc fields
-        foreach ($payment as $key => $value) {
-            if (strpos($key, 'cc_') !== 0) {
-                $orderOut['payment'][$key] = $value;
-            }
-        }
+        //foreach ($payment as $key => $value) {
+        //    if (strpos($key, 'cc_') !== 0) {
+        //        $orderOut['payment'][$key] = $value;
+        //    }
+        //}
 
         /** @var $orderOut Mage_Core_Model_Session */
         $session = Mage::getModel('core/session');
