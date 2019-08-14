@@ -24,7 +24,7 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
 
         while ($source->valid() || $bunchRows) {
             if ($startNewBunch || !$source->valid()) {
-                if ($startNewBunch && !array_values($nextRowBackup)[0]['sku']) {
+                if ($this->getBehavior() != Mage_ImportExport_Model_Import::BEHAVIOR_DELETE && $startNewBunch && !array_values($nextRowBackup)[0]['sku']) {
                     $arrKeys = array_keys($bunchRows);
                     $arrNew  = array();
                     while(($tRow = array_pop($bunchRows))) {
