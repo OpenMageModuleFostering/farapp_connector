@@ -116,7 +116,7 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
                 if (!$valid) {
                     $valid = $this->_createAttributeOption($attrParams['type'], $attrCode, $rowData, $rowNum);
                     if ($valid) {
-                        $attrParams['options'][] = strtolower($rowData[$attrCode]);
+                        $attrParams['options'][strtolower($rowData[$attrCode])] = $rowData[$attrCode];
                     }
                 } elseif (!empty($attrParams['is_unique'])) {
                     if (isset($this->_uniqueAttributes[$attrCode][$rowData[$attrCode]])) {
