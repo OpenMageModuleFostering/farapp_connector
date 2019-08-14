@@ -471,4 +471,132 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         $this->_isGroupPriceValid($rowData, $rowNum);
         $this->_isSuperProductsSkuValid($rowData, $rowNum);
     }
+
+    public function prepareDeletedProductsReindex()
+    {
+        if ($this->getBehavior() != Mage_ImportExport_Model_Import::BEHAVIOR_DELETE) {
+            return $this;
+        }
+        $skus = $this->_getProcessedProductSkus();
+        $productCollection = Mage::getModel('catalog/product')
+            ->getCollection()
+            ->addAttributeToFilter('sku', array('in' => $skus));
+        foreach ($productCollection as $product) {
+            /** @var $product Mage_Catalog_Model_Product */
+            $this->_logDeleteEvent($product);
+        }
+        return $this;
+    }
+
+    protected function _getProcessedProductSkus()
+    {
+        $skus = array();
+        $source = $this->getSource();
+        $source->rewind();
+        while ($source->valid()) {
+            $current = $source->current();
+            $key = $source->key();
+            if (! empty($current[self::COL_SKU]) && $this->_validatedRows[$key]) {
+                $skus[] = $current[self::COL_SKU];
+            }
+            $source->next();
+        }
+        return $skus;
+    }
+
+    public function reindexImportedProducts()
+    {
+        switch ($this->getBehavior()) {
+            case Mage_ImportExport_Model_Import::BEHAVIOR_DELETE:
+                $this->_indexDeleteEvents();
+                break;
+            case Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE:
+            case Mage_ImportExport_Model_Import::BEHAVIOR_APPEND:
+                $this->_reindexUpdatedProducts();
+                break;
+        }
+    }
+
+    protected function _reindexUpdatedProducts()
+    {
+        if (Mage::helper('core')->isModuleEnabled('Enterprise_Index')) {
+            Mage::getSingleton('enterprise_index/observer')->refreshIndex(Mage::getModel('cron/schedule'));
+        } else {
+            $entityIds = $this->_getProcessedProductIds();
+            /*
+             * Generate a fake mass update event that we pass to our indexers.
+             */
+            $event = Mage::getModel('index/event');
+            $event->setNewData(array(
+                'reindex_price_product_ids' => &$entityIds, // for product_indexer_price
+                'reindex_stock_product_ids' => &$entityIds, // for indexer_stock
+                'product_ids'               => &$entityIds, // for category_indexer_product
+                'reindex_eav_product_ids'   => &$entityIds  // for product_indexer_eav
+            ));
+            // Index our product entities.
+            Mage::getResourceSingleton('cataloginventory/indexer_stock')->catalogProductMassAction($event);
+            Mage::getResourceSingleton('catalog/product_indexer_price')->catalogProductMassAction($event);
+            Mage::getResourceSingleton('catalog/category_indexer_product')->catalogProductMassAction($event);
+            Mage::getResourceSingleton('catalog/product_indexer_eav')->catalogProductMassAction($event);
+            Mage::getResourceSingleton('catalogsearch/fulltext')->rebuildIndex(null, $entityIds);
+            if (Mage::getResourceModel('ecomdev_urlrewrite/indexer')) {
+                Mage::getResourceSingleton('ecomdev_urlrewrite/indexer')->updateProductRewrites($entityIds);
+            } else {
+                /* @var $urlModel Mage_Catalog_Model_Url */
+                $urlModel = Mage::getSingleton('catalog/url');
+                $urlModel->clearStoreInvalidRewrites(); // Maybe some products were moved or removed from website
+                foreach ($entityIds as $productId) {
+                    $urlModel->refreshProductRewrite($productId);
+                }
+            }
+            if (Mage::helper('catalog/product_flat')->isEnabled()) {
+                Mage::getSingleton('catalog/product_flat_indexer')->saveProduct($entityIds);
+            }
+        }
+        return $this;
+    }
+
+    protected function _getProcessedProductIds()
+    {
+        $productIds = array();
+        $source = $this->getSource();
+        $source->rewind();
+        while ($source->valid()) {
+            $current = $source->current();
+            if (! empty($current['sku']) && isset($this->_oldSku[$current[self::COL_SKU]])) {
+                $productIds[] = $this->_oldSku[$current[self::COL_SKU]]['entity_id'];
+            } elseif (! empty($current['sku']) && isset($this->_newSku[$current[self::COL_SKU]])) {
+                $productIds[] = $this->_newSku[$current[self::COL_SKU]]['entity_id'];
+            }
+            $source->next();
+        }
+        return $productIds;
+    }
+
+    protected function _logDeleteEvent($product)
+    {
+        /** @var $stockItem Mage_CatalogInventory_Model_Stock_Item */
+        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product->getId());
+        $stockItem->setForceReindexRequired(true);
+        Mage::getSingleton('index/indexer')->logEvent(
+            $stockItem,
+            Mage_CatalogInventory_Model_Stock_Item::ENTITY,
+            Mage_Index_Model_Event::TYPE_DELETE
+        );
+        Mage::getSingleton('index/indexer')->logEvent(
+            $product,
+            Mage_Catalog_Model_Product::ENTITY,
+            Mage_Index_Model_Event::TYPE_DELETE
+        );
+    }
+
+    protected function _indexDeleteEvents()
+    {
+        Mage::getSingleton('index/indexer')->indexEvents(
+            Mage_CatalogInventory_Model_Stock_Item::ENTITY, Mage_Index_Model_Event::TYPE_DELETE
+        );
+        Mage::getSingleton('index/indexer')->indexEvents(
+            Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_DELETE
+        );
+    }
 }

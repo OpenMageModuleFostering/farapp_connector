@@ -35,6 +35,7 @@ class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
                 );
             }
             else {
+                Mage::log('HI1 '.$product->getId());
                 $productDetails = $this->info($product->getId(), null, null, null, true);
                 $mediaApi = new Mage_Catalog_Model_Product_Attribute_Media_Api();
                 $mediaList = $mediaApi->items($product->getId());

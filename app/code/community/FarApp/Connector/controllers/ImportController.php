@@ -107,8 +107,10 @@ class FarApp_Connector_ImportController extends Mage_Core_Controller_Front_Actio
             }
 
             try {
+                $importModel->getEntityAdapter()->prepareDeletedProductsReindex();
                 $importModel->importSource();
-                $importModel->invalidateIndex();
+                $importModel->getEntityAdapter()->reindexImportedProducts();
+                //$importModel->invalidateIndex();
             } catch (Exception $e) {
                 echo $e->getMessage();
                 return;
