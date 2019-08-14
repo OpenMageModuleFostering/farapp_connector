@@ -76,7 +76,7 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         $destPath = $this->_getUploader()->correctFileNameCase(Mage_Core_Model_File_Uploader::getDispretionPath(basename($fileName)) . DS . $correctedBaseName);
         $fullDestPath = $this->_getUploader()->getDestDir() . DS . $destPath;
         if (!is_file($fullDestPath)) {
-            if (!is_file($fullTempPath) && strpos($fileName, 'http') === 0 && strpos($fileName, '://') !== false) {
+            if ((!is_file($fullTempPath) || !getimagesize($fullTempPath)) && strpos($fileName, 'http') === 0 && strpos($fileName, '://') !== false) {
                 try {
                     $dir = $this->_getUploader()->getTmpDir();
                     if (!is_dir($dir)) {
@@ -91,6 +91,7 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
                     curl_close($ch);
                     fclose($fileHandle);
                 } catch (Exception $e) {
+                    var_dump($e);
                     return '';
                 }
             }
