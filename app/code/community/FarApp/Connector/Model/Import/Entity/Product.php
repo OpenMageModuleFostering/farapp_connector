@@ -101,6 +101,102 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         }
     }
 
+    protected function _saveLinks()
+    {
+        $resource       = Mage::getResourceModel('catalog/product_link');
+        $mainTable      = $resource->getMainTable();
+        $positionAttrId = array();
+        /** @var Varien_Db_Adapter_Interface $adapter */
+        $adapter = $this->_connection;
+
+        // pre-load 'position' attributes ID for each link type once
+        foreach ($this->_linkNameToId as $linkName => $linkId) {
+            $select = $adapter->select()
+                ->from(
+                    $resource->getTable('catalog/product_link_attribute'),
+                    array('id' => 'product_link_attribute_id')
+                )
+                ->where('link_type_id = :link_id AND product_link_attribute_code = :position');
+            $bind = array(
+                ':link_id' => $linkId,
+                ':position' => 'position'
+            );
+            $positionAttrId[$linkId] = $adapter->fetchOne($select, $bind);
+        }
+        $nextLinkId = Mage::getResourceHelper('importexport')->getNextAutoincrement($mainTable);
+        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+            $productIds   = array();
+            $linkRows     = array();
+            $positionRows = array();
+
+            foreach ($bunch as $rowNum => $rowData) {
+                $this->_filterRowData($rowData);
+                if (!$this->isRowAllowedToImport($rowData, $rowNum)) {
+                    continue;
+                }
+                if (self::SCOPE_DEFAULT == $this->getRowScope($rowData)) {
+                    $sku = $rowData[self::COL_SKU];
+                }
+                foreach ($this->_linkNameToId as $linkName => $linkId) {
+                    $productId    = $this->_newSku[$sku]['entity_id'];
+                    $productIds[] = $productId;
+                    if (isset($rowData[$linkName . 'sku'])) {
+                        $linkedSku = $rowData[$linkName . 'sku'];
+
+                        if ((isset($this->_newSku[$linkedSku]) || isset($this->_oldSku[$linkedSku]))
+                                && $linkedSku != $sku) {
+                            if (isset($this->_newSku[$linkedSku])) {
+                                $linkedId = $this->_newSku[$linkedSku]['entity_id'];
+                            } else {
+                                $linkedId = $this->_oldSku[$linkedSku]['entity_id'];
+                            }
+                            $linkKey = "{$productId}-{$linkedId}-{$linkId}";
+
+                            if (!isset($linkRows[$linkKey])) {
+                                $linkRows[$linkKey] = array(
+                                    'link_id'           => $nextLinkId,
+                                    'product_id'        => $productId,
+                                    'linked_product_id' => $linkedId,
+                                    'link_type_id'      => $linkId
+                                );
+                                if (!empty($rowData[$linkName . 'position'])) {
+                                    $positionRows[] = array(
+                                        'link_id'                   => $nextLinkId,
+                                        'product_link_attribute_id' => $positionAttrId[$linkId],
+                                        'value'                     => $rowData[$linkName . 'position']
+                                    );
+                                }
+                                $nextLinkId++;
+                            }
+                        }
+                    }
+                }
+            }
+            if ($linkRows) {
+                if (Mage_ImportExport_Model_Import::BEHAVIOR_APPEND != $this->getBehavior() && $productIds) {
+                    $adapter->delete(
+                        $mainTable,
+                        $adapter->quoteInto('product_id IN (?)', array_unique($productIds))
+                    );
+                }
+                $adapter->insertOnDuplicate(
+                    $mainTable,
+                    $linkRows,
+                    array('link_id')
+                );
+                $adapter->changeTableAutoIncrement($mainTable, $nextLinkId);
+            }
+            if ($positionRows) { // process linked product positions
+                $adapter->insertOnDuplicate(
+                    $resource->getAttributeTypeTable('int'),
+                    $positionRows,
+                    array('value')
+                );
+            }
+        }
+        return $this;
+    }
+
     protected function _saveStockItem()
     {
         $defaultStockData = array(
