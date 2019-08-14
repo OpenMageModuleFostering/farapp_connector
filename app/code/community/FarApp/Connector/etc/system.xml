@@ -1,0 +1,40 @@
+<config>
+    <tabs>
+        <farapp_connector translate="label" module="connector">
+            <label>FarApp Connector</label>
+            <sort_order>99999</sort_order>
+        </farapp_connector>
+    </tabs>
+    <sections>
+        <connector translate="label" module="connector">
+            <label>FarApp Connector Settings</label>
+            <tab>farapp_connector</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>1000</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>0</show_in_website>
+            <show_in_store>0</show_in_store>
+            <groups>
+                <order translate="label">
+                    <label>Order Webhook</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <url>
+                            <label>URL</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[This URL is fired when an order is created or updated. The order data is posted to the URL.]]></comment>
+                        </url>
+                    </fields>
+                </order>
+            </groups>
+        </connector>
+    </sections>
+</config>
