@@ -9,7 +9,7 @@
 <config>
     <modules>
         <FarApp_Connector>
-            <version>1.2.7</version>
+            <version>1.2.8</version>
         </FarApp_Connector>
     </modules>
     <global>

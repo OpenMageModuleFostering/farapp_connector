@@ -24,7 +24,8 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
 
         while ($source->valid() || $bunchRows) {
             if ($startNewBunch || !$source->valid()) {
-                if ($this->getBehavior() != Mage_ImportExport_Model_Import::BEHAVIOR_DELETE && $startNewBunch && !array_values($nextRowBackup)[0]['sku']) {
+                $nextRowBackupValues = array_values($nextRowBackup);
+                if ($this->getBehavior() != Mage_ImportExport_Model_Import::BEHAVIOR_DELETE && $startNewBunch && !$nextRowBackupValues[0]['sku']) {
                     $arrKeys = array_keys($bunchRows);
                     $arrNew  = array();
                     while(($tRow = array_pop($bunchRows))) {
@@ -351,6 +352,15 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         return $this;
     }
 
+    protected function _filterRowData(&$rowData)
+    {
+        $rowData = array_filter($rowData, 'strlen');
+        // Exceptions - for sku - put them back in
+        if (!isset($rowData[self::COL_SKU])) {
+            $rowData[self::COL_SKU] = null;
+        }
+    }
+
     public function validateRow(array $rowData, $rowNum)
     {
         static $sku = null; // SKU is remembered through all product rows
@@ -430,5 +440,14 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
             }
         }
         return !isset($this->_invalidRows[$rowNum]);
+    }
+
+    protected function _validate($rowData, $rowNum, $sku)
+    {
+        $this->_isProductWebsiteValid($rowData, $rowNum);
+        $this->_isProductCategoryValid($rowData, $rowNum);
+        $this->_isTierPriceValid($rowData, $rowNum);
+        $this->_isGroupPriceValid($rowData, $rowNum);
+        $this->_isSuperProductsSkuValid($rowData, $rowNum);
     }
 }
