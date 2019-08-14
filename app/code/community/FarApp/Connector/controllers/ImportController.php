@@ -44,6 +44,7 @@ class FarApp_Connector_ImportController extends Mage_Core_Controller_Front_Actio
             return;
         }
         if ($data) {
+            Mage::app()->setCurrentStore('admin');
             /** @var $importModel Mage_ImportExport_Model_Import */
             $importModel = Mage::getModel('farapp_connector/import');
 
