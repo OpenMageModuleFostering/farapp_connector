@@ -65,13 +65,13 @@ class FarApp_Connector_Model_Product_Api extends Mage_Catalog_Model_Product_Api
 
         foreach ($product->getTypeInstance(true)->getEditableAttributes($product) as $attribute) {
             if ($this->_isAllowedAttribute($attribute, $attributes)) {
-                if ($detailed && $attribute->usesSource()) {
+                $attributeData = $product->getData($attribute->getAttributeCode());
+                if ($attributeData && $detailed && $attribute->usesSource()) {
                     $result[$attribute->getAttributeCode()] = $product->getAttributeText(
                                                                     $attribute->getAttributeCode());
                 }
                 else {
-                    $result[$attribute->getAttributeCode()] = $product->getData(
-                                                                    $attribute->getAttributeCode());
+                    $result[$attribute->getAttributeCode()] = $attributeData;
                 }
             }
         }
