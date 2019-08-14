@@ -442,6 +442,27 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
         return !isset($this->_invalidRows[$rowNum]);
     }
 
+    protected function _isProductCategoryValid(array $rowData, $rowNum)
+    {
+        $emptyCategory = empty($rowData[self::COL_CATEGORY]);
+        $emptyRootCategory = empty($rowData[self::COL_ROOT_CATEGORY]);
+        $hasCategory = $emptyCategory ? false : isset($this->_categories[$rowData[self::COL_CATEGORY]]);
+        $category = $emptyRootCategory ? null : $this->_categoriesWithRoots[$rowData[self::COL_ROOT_CATEGORY]];
+        if (!$emptyCategory && !$hasCategory) {
+            $this->addRowError("Category '".$rowData[self::COL_CATEGORY]."' not found", $rowNum);
+            return false;
+        }
+        else if (!$emptyRootCategory && !isset($category)) {
+            $this->addRowError("Root category '".$rowData[self::COL_ROOT_CATEGORY]."' not found", $rowNum);
+            return false;
+        }
+        else if (!$emptyRootCategory && !$emptyCategory && !isset($category[$rowData[self::COL_CATEGORY]])) {
+            $this->addRowError("Category '".$rowData[self::COL_CATEGORY]."' not found under root category '".$rowData[self::COL_ROOT_CATEGORY]."'", $rowNum);
+            return false;
+        }
+        return true;
+    }
+
     protected function _validate($rowData, $rowNum, $sku)
     {
         $this->_isProductWebsiteValid($rowData, $rowNum);
