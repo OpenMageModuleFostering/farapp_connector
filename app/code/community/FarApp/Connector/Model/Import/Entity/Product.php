@@ -72,7 +72,7 @@ class FarApp_Connector_Model_Import_Entity_Product extends Mage_ImportExport_Mod
     protected function _uploadMediaFiles($fileName)
     {
         $fullTempPath = $this->_getUploader()->getTmpDir() . DS . basename($fileName);
-        $fullDestPath = Mage_Core_Model_File_Uploader::getDispretionPath(basename($fileName)) . DS . basename($fileName);
+        $fullDestPath = $this->_getUploader()->correctFileNameCase(Mage_Core_Model_File_Uploader::getDispretionPath(basename($fileName)) . DS . basename($fileName));
         if (!is_file($fullTempPath) && !is_file($fullDestPath)) {
             if (strpos($fileName, 'http') === 0 && strpos($fileName, '://') !== false) {
                 try {
